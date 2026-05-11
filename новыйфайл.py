@@ -2280,6 +2280,8 @@ def handle_leave(data):
     if data and 'room_id' in data:
         leave_room(str(data['room_id']))
 
+socketio = SocketIO(app, async_mode='gevent', cors_allowed_origins="*")
+
 if __name__ == '__main__':
     import os
     port = int(os.environ.get('PORT', 5000))
