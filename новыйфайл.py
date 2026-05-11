@@ -110,7 +110,6 @@ LOGIN_TEMPLATE = '''
 <head>
     <title>ICQ — Вход</title>
     <style>
-        /* стили как в предыдущей версии, без изменений */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -171,7 +170,6 @@ REGISTER_TEMPLATE = '''
 <head>
     <title>ICQ — Регистрация</title>
     <style>
-        /* стили как в логине */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -230,7 +228,6 @@ CHAT_TEMPLATE = '''
     <title>ICQ — Чат</title>
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <style>
-        /* весь CSS оставляем как в предыдущей версии (без изменений) */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body { height: 100%; }
         body {
@@ -979,7 +976,28 @@ CHAT_TEMPLATE = '''
     </div>
 
     <!-- Модальные окна -->
-    <div id="create-modal" class="modal"><div class="modal-content"><span class="close-modal" onclick="closeModal('create-modal')">&times;</span><h2>Создать</h2><label>Название</label><input id="create-name"><label>Описание</label><textarea id="create-desc" rows="2"></textarea><label>Тип</label><select id="create-type" disabled><option value="channel">Канал</option><option value="group">Группа</option></select><label><input type="checkbox" id="create-private"> Приватный</label><label>Ссылка-приглашение</label><input id="create-link"><div class="modal-actions"><button class="btn-cancel" onclick="closeModal('create-modal')">Отмена</button><button class="btn-primary" onclick="submitCreateRoom()">Создать</button></div></div></div>
+    <div id="create-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('create-modal')">&times;</span>
+            <h2 id="create-modal-title">Создать</h2>
+            <label>Название</label>
+            <input id="create-name">
+            <label>Описание</label>
+            <textarea id="create-desc" rows="2"></textarea>
+            <label>Тип</label>
+            <select id="create-type">
+                <option value="channel">Канал</option>
+                <option value="group">Группа</option>
+            </select>
+            <label><input type="checkbox" id="create-private"> Приватный</label>
+            <label>Ссылка-приглашение</label>
+            <input id="create-link">
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeModal('create-modal')">Отмена</button>
+                <button class="btn-primary" onclick="submitCreateRoom()">Создать</button>
+            </div>
+        </div>
+    </div>
     <div id="search-modal" class="modal"><div class="modal-content"><span class="close-modal" onclick="closeModal('search-modal')">&times;</span><h2>Поиск каналов</h2><input id="search-query" placeholder="Название или ссылка"><button class="btn-primary" onclick="searchRooms()">Искать</button><div id="search-results"></div></div></div>
     <div id="user-search-modal" class="modal"><div class="modal-content"><span class="close-modal" onclick="closeModal('user-search-modal')">&times;</span><h2>Поиск пользователей</h2><input id="user-search-query"><button class="btn-primary" onclick="searchUsers()">Искать</button><div id="user-search-results"></div></div></div>
     <div id="room-settings-modal" class="modal"><div class="modal-content"><span class="close-modal" onclick="closeModal('room-settings-modal')">&times;</span><h2>Настройки комнаты</h2><label>Название</label><input id="rs-name"><label>Описание</label><textarea id="rs-desc" rows="2"></textarea><label>Приватность</label><select id="rs-private"><option value="0">Публичная</option><option value="1">Приватная</option></select><label>Ссылка</label><input id="rs-link"><div class="modal-actions"><button class="btn-cancel" onclick="closeModal('room-settings-modal')">Отмена</button><button class="btn-primary" onclick="submitRoomSettings()">Сохранить</button></div></div></div>
@@ -1007,9 +1025,8 @@ CHAT_TEMPLATE = '''
         let loadingOlder = false;
         let isWindowFocused = true;
 
-        // --- Непрочитанные сообщения ---
-        let unreadTotal = 0;               // общее количество непрочитанных
-        let unreadPerRoom = {};            // { roomId: count }
+        let unreadTotal = 0;
+        let unreadPerRoom = {};
 
         function updateTitle() {
             if (unreadTotal > 0) {
@@ -1019,7 +1036,6 @@ CHAT_TEMPLATE = '''
             }
         }
 
-        // Обновить индикатор в заголовке чата (рядом с названием комнаты)
         function updateRoomHeaderIndicator(roomId) {
             const roomTitleSpan = document.getElementById('room-title');
             if (!roomTitleSpan) return;
@@ -1032,7 +1048,6 @@ CHAT_TEMPLATE = '''
             }
         }
 
-        // Сбросить непрочитанные для текущей комнаты
         function resetUnreadForRoom(roomId) {
             if (unreadPerRoom[roomId]) {
                 unreadTotal -= unreadPerRoom[roomId];
@@ -1043,13 +1058,11 @@ CHAT_TEMPLATE = '''
             }
         }
 
-        // Добавить непрочитанное для комнаты
         function addUnreadForRoom(roomId, count = 1) {
             if (!unreadPerRoom[roomId]) unreadPerRoom[roomId] = 0;
             unreadPerRoom[roomId] += count;
             unreadTotal += count;
             updateTitle();
-            // Если эта комната сейчас открыта, сразу сбросим (но входящее сообщение в этой комнате не должно считаться)
             if (currentRoomId === roomId) {
                 resetUnreadForRoom(roomId);
             } else {
@@ -1057,7 +1070,6 @@ CHAT_TEMPLATE = '''
             }
         }
 
-        // --- Звуковые уведомления ---
         function playNotificationSound() {
             const soundEnabled = localStorage.getItem('notificationSound') !== 'off';
             if (!soundEnabled) return;
@@ -1078,7 +1090,6 @@ CHAT_TEMPLATE = '''
 
         window.addEventListener('focus', () => {
             isWindowFocused = true;
-            // Не сбрасываем общий счётчик, только при входе в комнату
         });
         window.addEventListener('blur', () => { isWindowFocused = false; });
 
@@ -1275,7 +1286,6 @@ CHAT_TEMPLATE = '''
                 socket.emit('leave', { room_id: currentRoomId });
             }
             currentRoomId = roomId;
-            // Сбрасываем непрочитанные для этой комнаты
             resetUnreadForRoom(roomId);
             welcomeScreen.style.display = 'none';
             chatInterface.style.display = 'flex';
@@ -1297,7 +1307,6 @@ CHAT_TEMPLATE = '''
             currentRoomSettings = data;
             currentSubrooms = data.subrooms || [{ id: 1, name: 'общий' }];
             let titleText = data.name;
-            // добавим индикатор, если есть непрочитанные в этой комнате
             const unread = unreadPerRoom[data.id] || 0;
             if (unread > 0) titleText += ` • ${unread}`;
             roomTitle.textContent = titleText;
@@ -1369,17 +1378,10 @@ CHAT_TEMPLATE = '''
         });
 
         socket.on('new_message', (data) => {
-            // Если сообщение от текущего пользователя, не считаем непрочитанным
             if (data.username !== username) {
-                // Если сообщение не в текущей открытой комнате, увеличиваем счётчик
                 if (currentRoomId !== data.room_id) {
                     addUnreadForRoom(data.room_id, 1);
-                } else {
-                    // Если сообщение в текущей комнате, но окно не в фокусе, тоже можно считать непрочитанным?
-                    // По желанию можно добавлять, но обычно в активной комнате не считаем.
-                    // Оставим так: не добавляем.
                 }
-                // Звук только если окно не в фокусе
                 if (!isWindowFocused) {
                     playNotificationSound();
                 }
@@ -1532,8 +1534,15 @@ CHAT_TEMPLATE = '''
         }
 
         function openCreateModal(type) {
-            document.getElementById('create-modal-title').textContent = type === 'channel' ? 'Создать канал' : 'Создать группу';
-            document.getElementById('create-type').value = type;
+            const modalTitle = document.getElementById('create-modal-title');
+            const typeSelect = document.getElementById('create-type');
+            if (type === 'channel') {
+                modalTitle.textContent = 'Создать канал';
+                typeSelect.value = 'channel';
+            } else if (type === 'group') {
+                modalTitle.textContent = 'Создать группу';
+                typeSelect.value = 'group';
+            }
             document.getElementById('create-name').value = '';
             document.getElementById('create-desc').value = '';
             document.getElementById('create-private').checked = false;
@@ -2279,8 +2288,6 @@ def handle_report_bug(data):
 def handle_leave(data):
     if data and 'room_id' in data:
         leave_room(str(data['room_id']))
-
-socketio = SocketIO(app, async_mode='gevent', cors_allowed_origins="*")
 
 if __name__ == '__main__':
     import os
